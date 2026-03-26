@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ava – Construction Media Growth Consultant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222222;
+    --accent: #f5b732;
+    --accent2: #ffd06b;
+    --text: #f0ece4;
+    --text-muted: #777;
+    --user-bubble: #1a1500;
+    --user-text: #f5e4a0;
+    --ava-bubble: #1a1a1a;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(245,183,50,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(245,183,50,0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(245,183,50,0.08);
+    display: flex;
+    flex-direction: column;
+    height: 700px;
+  }
+
+  .header {
+    padding: 20px 24px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,183,50,0.3), transparent);
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f5b732, #c8860a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: #0a0a0a;
+    font-weight: 400;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(245,183,50,0.15);
+  }
+
+  .header-info h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .header-info p {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    margin-left: auto;
+    box-shadow: 0 0 8px rgba(74,222,128,0.5);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    animation: fadeUp 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f5b732, #c8860a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 12px;
+    color: #0a0a0a;
+    flex-shrink: 0;
+  }
+
+  .bubble {
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .msg.ava .bubble {
+    background: var(--ava-bubble);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    border: 1px solid rgba(245,183,50,0.15);
+    border-bottom-right-radius: 4px;
+    color: var(--user-text);
+  }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 14px 16px;
+  }
+
+  .typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+    opacity: 0.6;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .quick-replies {
+    padding: 8px 16px 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .qr-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .qr-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245,183,50,0.06);
+  }
+
+  .input-area {
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+
+  .input-wrap {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: rgba(245,183,50,0.4);
+  }
+
+  #user-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    width: 100%;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.5;
+  }
+
+  #user-input::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #c8860a);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .send-btn:hover { opacity: 0.9; transform: scale(1.02); }
+  .send-btn:active { transform: scale(0.97); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send-btn svg { color: #0a0a0a; }
+
+  .ghl-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .ghl-status.show { opacity: 1; }
+  .ghl-status.success { color: #4ade80; }
+  .ghl-status.error { color: #f87171; }
+
+  .branding {
+    text-align: center;
+    padding: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .branding span { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="widget">
+  <div class="header">
+    <div class="avatar">A</div>
+    <div class="header-info">
+      <h2>Ava</h2>
+      <p>Construction Media Growth Consultant</p>
+    </div>
+    <div class="status-dot"></div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress"></div>
+  </div>
+
+  <div class="messages" id="messages"></div>
+  <div class="quick-replies" id="quick-replies"></div>
+  <div class="ghl-status" id="ghl-status"></div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="user-input" rows="1" placeholder="Type your message…"></textarea>
+    </div>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+  <div class="branding">Powered by <span>Construction Media</span> · AI Growth Consultant</div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const GHL_API_KEY   = 'pit-d817cced-2747-4f7c-908d-e9f3732520f9';
+const GHL_LOCATION  = 'ghqBeFjIuDrOufu6xZQf';
+const GHL_PIPELINE_NAME = 'Sales Pipeline';
+const ANTHROPIC_MODEL = 'claude-haiku-4-5-20251001';
+const ANTHROPIC_PROXY = '/api/chat';
+
+const SYSTEM_PROMPT = `You are Ava, a growth consultant at Construction Media.
+
+COMPANY:
+Construction Media — Growth Infrastructure for Construction Companies
+Location: Stockport, UK | Serving Nationwide
+Phone: +44 161 524 2749
+Email: info@construction-media.com
+Website: construction-media.com
+
+WHAT CONSTRUCTION MEDIA DOES:
+We install structured growth infrastructure for established construction and trade businesses. We are NOT a generic marketing agency. We build systems — visibility infrastructure, conversion systems, pipeline control, and local authority — that create predictable, qualified pipelines.
+
+We work EXCLUSIVELY with one company per trade, per area. This is non-negotiable.
+
+SERVICES & PRICING:
+
+FOUNDATION — £1,200/month
+• GBP Optimisation
+• Ranking Guarantee
+• Postcode Exclusivity
+• Monthly Reporting
+Perfect for getting started with structured visibility.
+
+DOMINANCE — £2,000/month (Most Popular)
+• Everything in Foundation
+• AI Estimator System (like the one you're speaking to now)
+• 21-Point Lead Qualification
+• Missed Call Text-Back
+• Expansion to 2 Postcodes
+• Review Generation Engine
+Adds automation and qualification to your pipeline.
+
+VISIBILITY — £3,500/month
+• Everything in Dominance
+• 3+ Postcode Strategy
+• Competitor Lock-out
+• Competitor Analysis
+• Priority Support Line
+Complete market control in your area.
+
+TOTAL OWNERSHIP — £5,500/month
+• Everything in Visibility
+• Tap4Review System
+• Full system for rapid growth
+For businesses serious about dominating their market.
+
+GUARANTEE: 10 Qualified Calls in 60 Days or we work for free.
+
+QUALIFICATION FLOW (ALWAYS IN THIS ORDER):
+1. What trade are you in? (Scaffolding / Shopfitting / Office fit-out / Builder / Plumber / Roofer / Electrician / Landscaper / Other)
+2. Where are you based? (Town/city and postcode area)
+3. How many staff including yourself?
+4. What's your average job value? (Under £1k / £1k-£5k / £5k-£20k / £20k+)
+5. How many jobs are you completing per month currently?
+6. How are you currently getting most of your leads? (Word of mouth / Google / Social media / Lead gen agencies / None structured)
+7. What's your biggest problem right now? (Not enough leads / Wrong type of leads / Too busy quoting time wasters / No system or structure / Inconsistent revenue)
+8. Do you currently have a CRM or any kind of pipeline system?
+9. Are you the owner/decision maker?
+10. What's your rough monthly budget for growth? (Under £500 / £500-£1,200 / £1,200-£2,000 / £2,000-£3,500 / £3,500+)
+
+CRITICAL BEHAVIOUR RULES:
+• Ask ONE question at a time
+• Never repeat questions already answered
+• Sound like a real consultant — warm, direct, no corporate fluff
+• Never be salesy — be genuinely helpful
+• Progress forward — never restart
+• Always move toward booking a strategy call
+• One company per trade per area — if they mention a trade/area already taken, note it
+
+EXCLUSIVITY CHECK:
+After getting their trade and location, acknowledge the exclusivity rule:
+"Just so you know — we work with one company per trade, per area. So if you're a scaffolder in SK9 for example, we'd be exclusive to you. Let me check what's available in your area when we speak."
+
+GUIDE PRICE RESPONSE:
+Once all questions answered, based on their budget and needs recommend the most appropriate package:
+- Under £500 → Foundation may be out of reach currently — be honest, suggest they save up or start with GBP optimisation only
+- £500-£1,200 → Foundation package — GBP, ranking, postcode exclusivity
+- £1,200-£2,000 → Dominance package — adds AI estimator and lead qualification
+- £2,000-£3,500 → Visibility package — full market control
+- £3,500+ → Total Ownership — complete domination
+
+Respond with:
+"Based on what you've told me — the [PACKAGE NAME] at £X/month looks like the right fit for where you are. This would give you [brief description of what it includes and why it fits their situation]. That said, the best next step is a 30-minute strategy call with me so I can give you a proper assessment of your area and what's possible. No obligation — just a straight conversation."
+
+GUARANTEE MENTION:
+Always mention: "And we back everything with a guarantee — 10 qualified calls in 60 days or we work for free."
+
+BOOKING FLOW:
+"Would you like to book a free 30-minute Growth Strategy Call? I can show you exactly what your competitors are doing, what's available in your area, and what results are realistic for your trade."
+If YES → Ask for preferred day/time (Mon-Fri, 9am-5pm)
+Then ask for name, email, phone (one at a time)
+Then confirm:
+"Perfect — I'll have someone from the Construction Media team call you at [time]. Before the call, it's worth having a think about your current monthly revenue and what you'd consider a successful outcome. Looking forward to it. 💪"
+
+NOT SUITABLE FILTER:
+If they are clearly not a fit (one-man band looking for quick wins, no budget, just starting out):
+"To be straight with you — our system works best for established businesses with consistent work who want to scale. If you're just getting started, we might not be the right fit yet. But if things are moving in the right direction in 6-12 months, we'd love to talk then."
+
+IMPORTANT INSTRUCTION FOR DATA EXTRACTION:
+After EVERY response, append a JSON block at the very end:
+<DATA>{"trade":"","location":"","staffCount":"","avgJobValue":"","jobsPerMonth":"","leadSource":"","biggestProblem":"","hasCRM":"","decisionMaker":"","budget":"","recommendedPackage":"","name":"","email":"","phone":"","callBooked":false,"callDateTime":"","stage":"qualifying"}</DATA>
+
+Only include fields that have been answered. stage should be: "qualifying", "pricing", "booking", or "complete".`;
+
+// ──────────────────────────────────────────────────────────
+
+let conversationHistory = [];
+let collectedData = {};
+let ghlContactId = null;
+let totalQuestions = 10;
+let questionsAnswered = 0;
+
+// ─── GHL FUNCTIONS ────────────────────────────────────────
+
+async function ghlRequest(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${GHL_API_KEY}`,
+      'Content-Type': 'application/json',
+      'Version': '2021-07-28'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(`https://services.leadconnectorhq.com${path}`, opts);
+    return await r.json();
+  } catch(e) {
+    console.error('GHL error:', e);
+    return null;
+  }
+}
+
+async function getPipelineId(callBooked = false) {
+  const res = await ghlRequest(`/opportunities/pipelines?locationId=${GHL_LOCATION}`);
+  if (!res || !res.pipelines) return null;
+  const pipeline = res.pipelines.find(p => p.name === GHL_PIPELINE_NAME) || res.pipelines[0];
+  if (!pipeline) return null;
+  const targetStage = callBooked ? 'booked' : 'new';
+  const stage = pipeline.stages?.find(s => s.name.toLowerCase().includes(targetStage)) || pipeline.stages?.[0];
+  return { pipelineId: pipeline.id, stageId: stage?.id };
+}
+
+async function createOrUpdateGHLContact(data) {
+  try {
+    const customFields = [
+      { key: 'trade', field_value: data.trade || '' },
+      { key: 'location', field_value: data.location || '' },
+      { key: 'staff_count', field_value: data.staffCount || '' },
+      { key: 'avg_job_value', field_value: data.avgJobValue || '' },
+      { key: 'jobs_per_month', field_value: data.jobsPerMonth || '' },
+      { key: 'lead_source', field_value: data.leadSource || '' },
+      { key: 'biggest_problem', field_value: data.biggestProblem || '' },
+      { key: 'has_crm', field_value: data.hasCRM || '' },
+      { key: 'budget', field_value: data.budget || '' },
+      { key: 'recommended_package', field_value: data.recommendedPackage || '' },
+    ].filter(f => f.field_value !== '');
+
+    const contactPayload = {
+      locationId: GHL_LOCATION,
+      firstName: data.name ? data.name.split(' ')[0] : 'Website',
+      lastName: data.name ? data.name.split(' ').slice(1).join(' ') || 'Enquiry' : 'Enquiry',
+      email: data.email || undefined,
+      phone: data.phone || undefined,
+      source: 'Ava AI Growth Consultant',
+      tags: ['ava ai', data.callBooked ? 'call booked' : 'in progress'],
+      customFields
+    };
+
+    const noteLines = [
+      '=== AVA AI GROWTH ENQUIRY ===',
+      `Trade: ${data.trade || 'Not provided'}`,
+      `Location: ${data.location || 'Not provided'}`,
+      `Staff Count: ${data.staffCount || 'Not provided'}`,
+      `Avg Job Value: ${data.avgJobValue || 'Not provided'}`,
+      `Jobs/Month: ${data.jobsPerMonth || 'Not provided'}`,
+      `Lead Source: ${data.leadSource || 'Not provided'}`,
+      `Biggest Problem: ${data.biggestProblem || 'Not provided'}`,
+      `Has CRM: ${data.hasCRM || 'Not provided'}`,
+      `Budget: ${data.budget || 'Not provided'}`,
+      `Recommended Package: ${data.recommendedPackage || 'Not provided'}`,
+      `Call Booked: ${data.callBooked ? 'YES - ' + (data.callDateTime || '') : 'No'}`,
+      `Stage: ${data.stage || 'qualifying'}`,
+      '=============================='
+    ];
+
+    if (!ghlContactId) {
+      const created = await ghlRequest('/contacts/', 'POST', contactPayload);
+      if (created && created.contact) {
+        ghlContactId = created.contact.id;
+        await ghlRequest(`/contacts/${ghlContactId}/notes`, 'POST', {
+          body: noteLines.join('\n'),
+          userId: ''
+        });
+        const pipelineInfo = await getPipelineId(data.callBooked);
+        if (pipelineInfo) {
+          await ghlRequest('/opportunities/', 'POST', {
+            pipelineId: pipelineInfo.pipelineId,
+            locationId: GHL_LOCATION,
+            name: `${data.trade || 'Trade'} Enquiry — ${data.location || 'Unknown Area'}`,
+            pipelineStageId: pipelineInfo.stageId,
+            status: 'open',
+            contactId: ghlContactId,
+          });
+        }
+        showGHLStatus('✓ Lead saved', 'success');
+      }
+    } else {
+      const updatePayload = {
+        firstName: contactPayload.firstName,
+        lastName: contactPayload.lastName,
+        customFields
+      };
+      if (data.email) updatePayload.email = data.email;
+      if (data.phone) updatePayload.phone = data.phone;
+      if (data.callBooked) updatePayload.tags = ['ava ai', 'call booked'];
+      await ghlRequest(`/contacts/${ghlContactId}`, 'PUT', updatePayload);
+      await ghlRequest(`/contacts/${ghlContactId}/notes`, 'POST', {
+        body: `[UPDATE]\n${noteLines.join('\n')}`,
+        userId: ''
+      });
+      showGHLStatus('✓ Updated', 'success');
+    }
+  } catch(e) {
+    console.error('GHL sync error:', e);
+    showGHLStatus('Sync pending', 'error');
+  }
+}
+
+function showGHLStatus(msg, type) {
+  const el = document.getElementById('ghl-status');
+  el.textContent = msg;
+  el.className = `ghl-status show ${type}`;
+  setTimeout(() => { el.className = 'ghl-status'; }, 3000);
+}
+
+// ─── QUICK REPLIES ────────────────────────────────────────
+function getQuickReplies(lastMessage) {
+  const msg = lastMessage.toLowerCase();
+  if (msg.includes('trade')) return ['Scaffolding', 'Shopfitting', 'Office fit-out', 'Builder'];
+  if (msg.includes('staff')) return ['Just me', '2-5 staff', '6-15 staff', '15+ staff'];
+  if (msg.includes('average job value') || msg.includes('job value')) return ['Under £1k', '£1k–£5k', '£5k–£20k', '£20k+'];
+  if (msg.includes('jobs') && msg.includes('month')) return ['1-3', '4-8', '9-15', '15+'];
+  if (msg.includes('leads') || msg.includes('getting')) return ['Word of mouth', 'Google', 'Social media', 'Lead agencies'];
+  if (msg.includes('biggest problem') || msg.includes('problem')) return ['Not enough leads', 'Wrong type of leads', 'Too many time wasters', 'No system'];
+  if (msg.includes('crm') || msg.includes('pipeline')) return ['Yes', 'No', 'What\'s a CRM?'];
+  if (msg.includes('decision maker') || msg.includes('owner')) return ['Yes, I\'m the owner', 'No, need sign-off'];
+  if (msg.includes('budget') || msg.includes('monthly')) return ['Under £500', '£500–£1,200', '£1,200–£2,000', '£2,000–£3,500', '£3,500+'];
+  if (msg.includes('strategy call') || msg.includes('book')) return ['Yes, book a call', 'Not right now'];
+  return [];
+}
+
+function showQuickReplies(replies) {
+  const container = document.getElementById('quick-replies');
+  container.innerHTML = '';
+  replies.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = r;
+    btn.onclick = () => {
+      document.getElementById('user-input').value = r;
+      sendMessage();
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ─── CHAT FUNCTIONS ───────────────────────────────────────
+function addMessage(role, text) {
+  const container = document.getElementById('messages');
+
+  if (role === 'typing') {
+    const div = document.createElement('div');
+    div.className = 'msg ava';
+    div.id = 'typing-indicator';
+    div.innerHTML = `
+      <div class="msg-avatar">A</div>
+      <div class="bubble">
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return;
+  }
+
+  const existing = document.getElementById('typing-indicator');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  if (role === 'ava') {
+    div.innerHTML = `<div class="msg-avatar">A</div><div class="bubble">${escapeHtml(text)}</div>`;
+  } else {
+    div.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  }
+
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function updateProgress() {
+  const pct = Math.min((questionsAnswered / totalQuestions) * 100, 100);
+  document.getElementById('progress').style.width = pct + '%';
+}
+
+function extractData(responseText) {
+  const match = responseText.match(/<DATA>(.*?)<\/DATA>/s);
+  if (!match) return null;
+  try { return JSON.parse(match[1]); } catch(e) { return null; }
+}
+
+function stripDataTag(text) {
+  return text.replace(/<DATA>.*?<\/DATA>/s, '').trim();
+}
+
+function countAnswered(data) {
+  const fields = ['trade','location','staffCount','avgJobValue','jobsPerMonth','leadSource','biggestProblem','hasCRM','decisionMaker','budget'];
+  return fields.filter(f => data[f] && data[f].length > 0).length;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('quick-replies').innerHTML = '';
+  document.getElementById('send-btn').disabled = true;
+
+  addMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+  addMessage('typing');
+
+  try {
+    const response = await fetch(ANTHROPIC_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    const fullText = data.content?.[0]?.text || "I'm sorry, I had a technical issue. Please try again.";
+
+    const extracted = extractData(fullText);
+    if (extracted) {
+      collectedData = { ...collectedData, ...Object.fromEntries(Object.entries(extracted).filter(([,v]) => v !== '' && v !== false)) };
+      questionsAnswered = countAnswered(collectedData);
+      updateProgress();
+      if (questionsAnswered >= 1 || collectedData.email || collectedData.phone) {
+        createOrUpdateGHLContact(collectedData);
+      }
+    }
+
+    const cleanText = stripDataTag(fullText);
+    conversationHistory.push({ role: 'assistant', content: fullText });
+    addMessage('ava', cleanText);
+
+    const qr = getQuickReplies(cleanText);
+    if (qr.length > 0) showQuickReplies(qr);
+
+  } catch(e) {
+    const existing = document.getElementById('typing-indicator');
+    if (existing) existing.remove();
+    addMessage('ava', 'Sorry, I had a technical issue. Please try again in a moment.');
+    console.error(e);
+  }
+
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+async function init() {
+  addMessage('typing');
+  conversationHistory = [{ role: 'user', content: 'Hello' }];
+
+  try {
+    const response = await fetch(ANTHROPIC_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: conversationHistory
+      })
+    });
+
+    const data = await response.json();
+    const fullText = data.content?.[0]?.text || "Hi! I'm Ava from Construction Media. How can I help you today?";
+    const cleanText = stripDataTag(fullText);
+    conversationHistory.push({ role: 'assistant', content: fullText });
+    addMessage('ava', cleanText);
+    const qr = getQuickReplies(cleanText);
+    if (qr.length > 0) showQuickReplies(qr);
+  } catch(e) {
+    const existing = document.getElementById('typing-indicator');
+    if (existing) existing.remove();
+    addMessage('ava', "Hi — I'm Ava, Construction Media's growth consultant. I help established construction and trade businesses build predictable, qualified pipelines. To get started — what trade are you in?");
+    showQuickReplies(['Scaffolding', 'Shopfitting', 'Office fit-out', 'Builder']);
+  }
+}
+
+document.getElementById('user-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+document.getElementById('user-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+init();
+</script>
+</body>
+</html>
