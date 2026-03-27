@@ -4,7 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ava – Construction Media Growth Consultant</title>
-<style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VCFGGDJBGE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-VCFGGDJBGE');
+
+  function trackEvent(name, params = {}) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', name, params);
+    }
+  }
+</script>
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
   :root {
@@ -395,10 +408,10 @@ YOUR TONE:
 Talk like someone who's actually been on site — not someone who went to a marketing conference. Plain English. Direct. No corporate waffle. No agency speak. Warm but straight to the point. You understand the trade world — the early starts, the missed calls from up a scaffold, the time wasters who want three quotes and pick the cheapest. You get it.
 
 GREETING:
-Always start with the appropriate time-based greeting — you will be told the current time of day in the first message. Use:
-- "Good morning" before 12pm
-- "Good afternoon" between 12pm and 5pm  
-- "Good evening" after 5pm
+Always open with exactly this format:
+"Good [morning/afternoon/evening] — I'm Ava from Construction Media. We help trade businesses stop chasing work and start getting found properly. Quick few questions to see if we can help — what trade are you in?"
+
+Use the time of day provided in the first message to pick morning/afternoon/evening.
 
 NEVER use markdown formatting like **bold** or *italic* — plain text only. No asterisks ever.
 
@@ -784,6 +797,12 @@ async function sendMessage() {
 
   addMessage('user', text);
   conversationHistory.push({ role: 'user', content: text });
+
+  // Track first message
+  if (conversationHistory.filter(m => m.role === 'user').length === 2) {
+    trackEvent('ava_engaged');
+  }
+
   addMessage('typing');
 
   try {
@@ -806,6 +825,11 @@ async function sendMessage() {
       collectedData = { ...collectedData, ...Object.fromEntries(Object.entries(extracted).filter(([,v]) => v !== '' && v !== false)) };
       questionsAnswered = countAnswered(collectedData);
       updateProgress();
+
+      // Track key stages
+      if (extracted.stage === 'pricing') trackEvent('ava_qualified', { trade: collectedData.trade, location: collectedData.location });
+      if (extracted.callBooked === true) trackEvent('ava_converted', { package: collectedData.recommendedPackage });
+
       if (questionsAnswered >= 1 || collectedData.email || collectedData.phone) {
         createOrUpdateGHLContact(collectedData);
       }
@@ -847,6 +871,7 @@ function getTimeOfDay() {
 }
 
 async function init() {
+  trackEvent('ava_opened');
   addMessage('typing');
   const timeOfDay = getTimeOfDay();
   conversationHistory = [{ role: 'user', content: `Hello (it is currently ${timeOfDay})` }];
@@ -864,7 +889,7 @@ async function init() {
     });
 
     const data = await response.json();
-    const fullText = data.content?.[0]?.text || "Good evening — I'm Ava from Construction Media. Quick few questions to see if we can help. What trade are you in?";
+    const fullText = data.content?.[0]?.text || `Good ${timeOfDay} — I'm Ava from Construction Media. We help trade businesses stop chasing work and start getting found properly. Quick few questions to see if we can help — what trade are you in?`;
     const cleanText = stripMarkdown(stripDataTag(fullText));
     conversationHistory.push({ role: 'assistant', content: fullText });
     addMessage('ava', cleanText);
