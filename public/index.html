@@ -394,6 +394,14 @@ You work with ONE company per trade per area. That's non-negotiable and it's a g
 YOUR TONE:
 Talk like someone who's actually been on site — not someone who went to a marketing conference. Plain English. Direct. No corporate waffle. No agency speak. Warm but straight to the point. You understand the trade world — the early starts, the missed calls from up a scaffold, the time wasters who want three quotes and pick the cheapest. You get it.
 
+GREETING:
+Always start with the appropriate time-based greeting — you will be told the current time of day in the first message. Use:
+- "Good morning" before 12pm
+- "Good afternoon" between 12pm and 5pm  
+- "Good evening" after 5pm
+
+NEVER use markdown formatting like **bold** or *italic* — plain text only. No asterisks ever.
+
 NEVER say things like:
 - "ad hoc" 
 - "lead acquisition strategy"
@@ -803,7 +811,7 @@ async function sendMessage() {
       }
     }
 
-    const cleanText = stripDataTag(fullText);
+    const cleanText = stripMarkdown(stripDataTag(fullText));
     conversationHistory.push({ role: 'assistant', content: fullText });
     addMessage('ava', cleanText);
 
@@ -822,9 +830,26 @@ async function sendMessage() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    .trim();
+}
+
+function getTimeOfDay() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 17) return 'afternoon';
+  return 'evening';
+}
+
 async function init() {
   addMessage('typing');
-  conversationHistory = [{ role: 'user', content: 'Hello' }];
+  const timeOfDay = getTimeOfDay();
+  conversationHistory = [{ role: 'user', content: `Hello (it is currently ${timeOfDay})` }];
 
   try {
     const response = await fetch(ANTHROPIC_PROXY, {
@@ -839,8 +864,8 @@ async function init() {
     });
 
     const data = await response.json();
-    const fullText = data.content?.[0]?.text || "Hi! I'm Ava from Construction Media. How can I help you today?";
-    const cleanText = stripDataTag(fullText);
+    const fullText = data.content?.[0]?.text || "Good evening — I'm Ava from Construction Media. Quick few questions to see if we can help. What trade are you in?";
+    const cleanText = stripMarkdown(stripDataTag(fullText));
     conversationHistory.push({ role: 'assistant', content: fullText });
     addMessage('ava', cleanText);
     const qr = getQuickReplies(cleanText);
